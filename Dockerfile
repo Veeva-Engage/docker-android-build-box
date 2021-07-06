@@ -2,19 +2,15 @@ FROM alpine:3.13
 
 RUN apk update && apk upgrade && apk --update add \
     ruby-full ruby-dev ruby-rake ruby-io-console ruby-bigdecimal ruby-json ruby-bundler \
-    libstdc++ tzdata bash ca-certificates openjdk11-jdk \
+    libstdc++ tzdata bash ca-certificates openjdk8 openjdk11-jdk \
       make gcc libc-dev g++ \
     &&  echo 'gem: --no-document' > /etc/gemrc
     #RUN apk add ruby-full
     #RUN apk add ruby-dev
 
-RUN apk --update  add --no-cache
-#RUN apk add --no-cache openjdk8
-
 ENV ANDROID_HOME="/opt/android-sdk" \
     ANDROID_NDK="/opt/android-ndk" \
-    FLUTTER_HOME="/opt/flutter" \
-    JAVA_HOME="/usr/lib/jvm/java-11-openjdk/"
+    JAVA_HOME="/usr/lib/jvm/java-8-openjdk/"
 
 ENV TZ=America/Los_Angeles
 
@@ -45,7 +41,8 @@ ENV LANG="en_US.UTF-8" \
 ENV ANDROID_SDK_HOME="$ANDROID_HOME"
 ENV ANDROID_NDK_HOME="$ANDROID_NDK/android-ndk-$ANDROID_NDK_VERSION"
 
-ENV PATH="$JAVA_HOME/bin:$PATH:$ANDROID_SDK_HOME/emulator:$ANDROID_SDK_HOME/tools/bin:$ANDROID_SDK_HOME/tools:$ANDROID_SDK_HOME/platform-tools:$ANDROID_NDK:$FLUTTER_HOME/bin:$FLUTTER_HOME/bin/cache/dart-sdk/bin"
+ENV PATH_NO_JAVA="$JAVA_HOME/bin:$PATH:$ANDROID_SDK_HOME/emulator:$ANDROID_SDK_HOME/tools/bin:$ANDROID_SDK_HOME/tools:$ANDROID_SDK_HOME/platform-tools:$ANDROID_NDK:$FLUTTER_HOME/bin:$FLUTTER_HOME/bin/cache/dart-sdk/bin"
+ENV PATH="$JAVA_HOME/bin:$PATH_NO_JAVA"
 
 #WORKDIR /tmp
 
@@ -132,9 +129,8 @@ RUN echo "sdk tools ${ANDROID_SDK_TOOLS_VERSION}" && \
         "https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_TOOLS_VERSION}.zip" && \
     mkdir --parents "$ANDROID_HOME" && \
     unzip -q sdk-tools.zip -d "$ANDROID_HOME" && \
-    rm -f sdk-tools.zip
-
-RUN echo "ndk ${ANDROID_NDK_VERSION}" && \
+    rm -f sdk-tools.zip && \
+    echo "ndk ${ANDROID_NDK_VERSION}" && \
     wget --quiet --output-document=android-ndk.zip \
     "http://dl.google.com/android/repository/android-ndk-${ANDROID_NDK_VERSION}-linux-x86_64.zip" && \
     mkdir --parents "$ANDROID_NDK_HOME" && \
@@ -144,35 +140,20 @@ RUN echo "ndk ${ANDROID_NDK_VERSION}" && \
 # Install SDKs
 # Please keep these in descending order!
 # The `yes` is for accepting all non-standard tool licenses.
-#RUN mkdir --parents "$HOME/.android/" && \
-#    echo '### User Sources for Android SDK Manager' > \
-#        "$HOME/.android/repositories.cfg" && \
-#    yes | "$ANDROID_HOME"/tools/bin/sdkmanager --licenses > /dev/null
-
-#RUN echo "platforms" && \
-#    yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
-#        "platforms;android-30" \
-#     > /dev/null
-#        "platforms;android-29" \
-#        "platforms;android-28" \
-#        "platforms;android-27" \
-#        "platforms;android-26" \
-#        "platforms;android-25" \
-
-#RUN echo "platform tools" && \
-#    yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
-#        "platform-tools" > /dev/null
-
-#RUN echo "build tools 25-30" && \
-#    yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
-#        "build-tools;30.0.3" \
-#> /dev/null
-#        "build-tools;29.0.3" "build-tools;29.0.2" \
-#        "build-tools;28.0.3" "build-tools;28.0.2" \
-#        "build-tools;27.0.3" "build-tools;27.0.2" "build-tools;27.0.1" \
-#        "build-tools;26.0.2" "build-tools;26.0.1" "build-tools;26.0.0" \
-#        "build-tools;25.0.3" "build-tools;25.0.2" \
-#        "build-tools;25.0.1" "build-tools;25.0.0"
+RUN mkdir --parents "$HOME/.android/" && \
+    echo '### User Sources for Android SDK Manager' > \
+        "$HOME/.android/repositories.cfg" && \
+    yes | "$ANDROID_HOME"/tools/bin/sdkmanager --licenses && \
+    echo "platforms" && \
+    yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
+        "platforms;android-30" && \
+    echo "platform tools" && \
+    yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
+        "platform-tools" && \
+    echo "build tools 25-30" && \
+    yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
+        "build-tools;30.0.3" \
+    > /dev/null
 
 #RUN echo "emulator" && \
 #    yes | "$ANDROID_HOME"/tools/bin/sdkmanager "emulator" > /dev/null
@@ -190,8 +171,9 @@ RUN echo "ndk ${ANDROID_NDK_VERSION}" && \
 #    rm -f flutter.tar.xz
 
 # Copy sdk license agreement files.
-#RUN mkdir -p $ANDROID_HOME/licenses
-#COPY sdk/licenses/* $ANDROID_HOME/licenses/
+RUN mkdir -p $ANDROID_HOME/licenses && \
+    apk del openjdk8
+COPY sdk/licenses/* $ANDROID_HOME/licenses/
 
 # Create some jenkins required directory to allow this image run with Jenkins
 #RUN mkdir -p /var/lib/jenkins/workspace && \
@@ -201,6 +183,8 @@ RUN echo "ndk ${ANDROID_NDK_VERSION}" && \
 #    chmod 777 $ANDROID_HOME/.android
 
 #COPY README.md /README.md
+
+ENV JAVA_HOME="/usr/lib/jvm/java-11-openjdk/", PATH="$JAVA_HOME/bin:$PATH_NO_JAVA"
 
 ARG BUILD_DATE=""
 ARG SOURCE_BRANCH=""
