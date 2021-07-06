@@ -1,19 +1,17 @@
 FROM ruby:3-alpine
 
-RUN apk update
-RUN apk add --no-cache openjdk11-jdk
+CMD ["sh"]
+
+RUN apk --update  add --no-cache openjdk11-jdk \
+  make gcc libc-dev g++
 #RUN apk add --no-cache openjdk8
 #RUN apk add ruby-full
 #RUN apk add ruby-dev
-RUN apk add make
-RUN apk add gcc
-RUN apk add libc-dev
-RUN apk add g++
 
 ENV ANDROID_HOME="/opt/android-sdk" \
     ANDROID_NDK="/opt/android-ndk" \
     FLUTTER_HOME="/opt/flutter" \
-    JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64/"
+    JAVA_HOME="/usr/lib/jvm/java-11-openjdk/"
 
 ENV TZ=America/Los_Angeles
 
