@@ -1,7 +1,14 @@
 FROM alpine:3.14
 
+RUN apk update
 RUN apk add --no-cache openjdk11-jdk
 #RUN apk add --no-cache openjdk8
+RUN apk add ruby-full
+RUN apk add ruby-dev
+RUN apk add make
+RUN apk add gcc
+RUN apk add libc-dev
+RUN apk add g++
 
 ENV ANDROID_HOME="/opt/android-sdk" \
     ANDROID_NDK="/opt/android-ndk" \
