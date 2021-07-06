@@ -86,12 +86,12 @@ RUN mkdir --parents "$HOME/.android/" && \
 #    rm -f sdk.install.sh
 
 # Copy sdk license agreement files.
-RUN mkdir -p $ANDROID_HOME/licenses && \
-    apk del openjdk8
+RUN mkdir -p $ANDROID_HOME/licenses #&& \
+#    apk del openjdk8
 COPY sdk/licenses/* $ANDROID_HOME/licenses/
 
-ENV JAVA_HOME="/usr/lib/jvm/java-11-openjdk/" \
-    PATH="$JAVA_HOME/bin:$PATH_NO_JAVA"
+#ENV JAVA_HOME="/usr/lib/jvm/java-11-openjdk/" \
+#    PATH="$JAVA_HOME/bin:$PATH_NO_JAVA"
 
 ARG BUILD_DATE=""
 ARG SOURCE_BRANCH=""
