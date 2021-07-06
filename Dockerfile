@@ -1,6 +1,9 @@
-FROM ruby:3-alpine
+FROM alpine:3.13
 
-CMD ["sh"]
+RUN apk update && apk upgrade && apk --update add \
+    ruby ruby-irb ruby-rake ruby-io-console ruby-bigdecimal ruby-json ruby-bundler \
+    libstdc++ tzdata bash ca-certificates \
+    &&  echo 'gem: --no-document' > /etc/gemrc
 
 RUN apk --update  add --no-cache openjdk11-jdk \
   make gcc libc-dev g++
@@ -114,50 +117,52 @@ ENV PATH="$JAVA_HOME/bin:$PATH:$ANDROID_SDK_HOME/emulator:$ANDROID_SDK_HOME/tool
 #    rm -rf /tmp/* /var/tmp/*
 
 # Install Android SDK
-#RUN echo "sdk tools ${ANDROID_SDK_TOOLS_VERSION}" && \
-#    wget --quiet --output-document=sdk-tools.zip \
-#        "https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_TOOLS_VERSION}.zip" && \
-#    mkdir --parents "$ANDROID_HOME" && \
-#    unzip -q sdk-tools.zip -d "$ANDROID_HOME" && \
-#    rm -f sdk-tools.zip
+RUN echo "sdk tools ${ANDROID_SDK_TOOLS_VERSION}" && \
+    wget --quiet --output-document=sdk-tools.zip \
+        "https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_TOOLS_VERSION}.zip" && \
+    mkdir --parents "$ANDROID_HOME" && \
+    unzip -q sdk-tools.zip -d "$ANDROID_HOME" && \
+    rm -f sdk-tools.zip
 
-#RUN echo "ndk ${ANDROID_NDK_VERSION}" && \
-#    wget --quiet --output-document=android-ndk.zip \
-#    "http://dl.google.com/android/repository/android-ndk-${ANDROID_NDK_VERSION}-linux-x86_64.zip" && \
-#    mkdir --parents "$ANDROID_NDK_HOME" && \
-#    unzip -q android-ndk.zip -d "$ANDROID_NDK" && \
-#    rm -f android-ndk.zip
+RUN echo "ndk ${ANDROID_NDK_VERSION}" && \
+    wget --quiet --output-document=android-ndk.zip \
+    "http://dl.google.com/android/repository/android-ndk-${ANDROID_NDK_VERSION}-linux-x86_64.zip" && \
+    mkdir --parents "$ANDROID_NDK_HOME" && \
+    unzip -q android-ndk.zip -d "$ANDROID_NDK" && \
+    rm -f android-ndk.zip
 
 # Install SDKs
 # Please keep these in descending order!
 # The `yes` is for accepting all non-standard tool licenses.
-#RUN mkdir --parents "$HOME/.android/" && \
-#    echo '### User Sources for Android SDK Manager' > \
-#        "$HOME/.android/repositories.cfg" && \
-#    yes | "$ANDROID_HOME"/tools/bin/sdkmanager --licenses > /dev/null
+RUN mkdir --parents "$HOME/.android/" && \
+    echo '### User Sources for Android SDK Manager' > \
+        "$HOME/.android/repositories.cfg" && \
+    yes | "$ANDROID_HOME"/tools/bin/sdkmanager --licenses > /dev/null
 
-#RUN echo "platforms" && \
-#    yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
-#        "platforms;android-30" \
+RUN echo "platforms" && \
+    yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
+        "platforms;android-30" \
+     > /dev/null
 #        "platforms;android-29" \
 #        "platforms;android-28" \
 #        "platforms;android-27" \
 #        "platforms;android-26" \
-#        "platforms;android-25" > /dev/null
+#        "platforms;android-25" \
 
 #RUN echo "platform tools" && \
 #    yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
 #        "platform-tools" > /dev/null
 
-#RUN echo "build tools 25-30" && \
-#    yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
-#        "build-tools;30.0.0" \
+RUN echo "build tools 25-30" && \
+    yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
+        "build-tools;30.0.3" \
+> /dev/null
 #        "build-tools;29.0.3" "build-tools;29.0.2" \
 #        "build-tools;28.0.3" "build-tools;28.0.2" \
 #        "build-tools;27.0.3" "build-tools;27.0.2" "build-tools;27.0.1" \
 #        "build-tools;26.0.2" "build-tools;26.0.1" "build-tools;26.0.0" \
 #        "build-tools;25.0.3" "build-tools;25.0.2" \
-#        "build-tools;25.0.1" "build-tools;25.0.0" > /dev/null
+#        "build-tools;25.0.1" "build-tools;25.0.0"
 
 #RUN echo "emulator" && \
 #    yes | "$ANDROID_HOME"/tools/bin/sdkmanager "emulator" > /dev/null
