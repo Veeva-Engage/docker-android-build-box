@@ -2,7 +2,6 @@ FROM ubuntu:18.04
 
 ENV ANDROID_HOME="/opt/android-sdk" \
     ANDROID_NDK="/opt/android-ndk" \
-    FLUTTER_HOME="/opt/flutter" \
     JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64/"
 
 ENV TZ=America/Los_Angeles
@@ -11,9 +10,8 @@ ENV TZ=America/Los_Angeles
 ENV ANDROID_SDK_TOOLS_VERSION="4333796"
 
 # Get the latest version from https://developer.android.com/ndk/downloads/index.html
-ENV ANDROID_NDK_VERSION="r21d"
+ENV ANDROID_NDK_VERSION="r21e"
 
-# nodejs version
 ENV NODE_VERSION="12.x"
 
 # Set locale
@@ -34,7 +32,8 @@ ENV DEBIAN_FRONTEND="noninteractive" \
 ENV ANDROID_SDK_HOME="$ANDROID_HOME"
 ENV ANDROID_NDK_HOME="$ANDROID_NDK/android-ndk-$ANDROID_NDK_VERSION"
 
-ENV PATH="$JAVA_HOME/bin:$PATH:$ANDROID_SDK_HOME/emulator:$ANDROID_SDK_HOME/tools/bin:$ANDROID_SDK_HOME/tools:$ANDROID_SDK_HOME/platform-tools:$ANDROID_NDK:$FLUTTER_HOME/bin:$FLUTTER_HOME/bin/cache/dart-sdk/bin"
+ENV PATH_NO_JAVA="$PATH:$ANDROID_SDK_HOME/emulator:$ANDROID_SDK_HOME/tools/bin:$ANDROID_SDK_HOME/tools:$ANDROID_SDK_HOME/platform-tools:$ANDROID_NDK:$FLUTTER_HOME/bin:$FLUTTER_HOME/bin/cache/dart-sdk/bin"
+ENV PATH="$JAVA_HOME/bin:$PATH_NO_JAVA"
 
 WORKDIR /tmp
 
@@ -77,7 +76,7 @@ RUN apt-get update -qq > /dev/null && \
         zlib1g-dev > /dev/null && \
     echo "set timezone" && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
-    echo "nodejs, npm, cordova, ionic, react-native" && \
+    echo "nodejs, npm" && \
     curl -sL -k https://deb.nodesource.com/setup_${NODE_VERSION} \
         | bash - > /dev/null && \
     apt-get install -qq nodejs > /dev/null && \
@@ -90,18 +89,7 @@ RUN apt-get update -qq > /dev/null && \
     apt-get install -qq yarn > /dev/null && \
     rm -rf /var/lib/apt/lists/ && \
     npm install --quiet -g npm > /dev/null && \
-    npm install --quiet -g \
-        bower \
-        cordova \
-        eslint \
-        gulp \
-        ionic \
-        jshint \
-        karma-cli \
-        mocha \
-        node-gyp \
-        npm-check-updates \
-        react-native-cli > /dev/null && \
+    npm install --quiet -g firebase-tools > /dev/null && \
     npm cache clean --force > /dev/null && \
     rm -rf /tmp/* /var/tmp/*
 
@@ -130,12 +118,12 @@ RUN mkdir --parents "$HOME/.android/" && \
 
 RUN echo "platforms" && \
     yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
-        "platforms;android-30" \
-        "platforms;android-29" \
-        "platforms;android-28" \
-        "platforms;android-27" \
-        "platforms;android-26" \
-        "platforms;android-25" > /dev/null
+        "platforms;android-30" > /dev/null
+#        "platforms;android-29" \
+#        "platforms;android-28" \
+#        "platforms;android-27" \
+#        "platforms;android-26" \
+#        "platforms;android-25"
 
 RUN echo "platform tools" && \
     yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
@@ -143,39 +131,39 @@ RUN echo "platform tools" && \
 
 RUN echo "build tools 25-30" && \
     yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
-        "build-tools;30.0.0" \
-        "build-tools;29.0.3" "build-tools;29.0.2" \
-        "build-tools;28.0.3" "build-tools;28.0.2" \
-        "build-tools;27.0.3" "build-tools;27.0.2" "build-tools;27.0.1" \
-        "build-tools;26.0.2" "build-tools;26.0.1" "build-tools;26.0.0" \
-        "build-tools;25.0.3" "build-tools;25.0.2" \
-        "build-tools;25.0.1" "build-tools;25.0.0" > /dev/null
+        "build-tools;30.0.3" > /dev/null
+#        "build-tools;29.0.3" "build-tools;29.0.2" \
+#        "build-tools;28.0.3" "build-tools;28.0.2" \
+#        "build-tools;27.0.3" "build-tools;27.0.2" "build-tools;27.0.1" \
+#        "build-tools;26.0.2" "build-tools;26.0.1" "build-tools;26.0.0" \
+#        "build-tools;25.0.3" "build-tools;25.0.2" \
+#        "build-tools;25.0.1" "build-tools;25.0.0"
 
-RUN echo "emulator" && \
-    yes | "$ANDROID_HOME"/tools/bin/sdkmanager "emulator" > /dev/null
+#RUN echo "emulator" && \
+#    yes | "$ANDROID_HOME"/tools/bin/sdkmanager "emulator" > /dev/null
 
-RUN echo "kotlin" && \
-    wget --quiet -O sdk.install.sh "https://get.sdkman.io" && \
-    bash -c "bash ./sdk.install.sh > /dev/null && source ~/.sdkman/bin/sdkman-init.sh && sdk install kotlin" && \
-    rm -f sdk.install.sh
+#RUN echo "kotlin" && \
+#    wget --quiet -O sdk.install.sh "https://get.sdkman.io" && \
+#    bash -c "bash ./sdk.install.sh > /dev/null && source ~/.sdkman/bin/sdkman-init.sh && sdk install kotlin" && \
+#    rm -f sdk.install.sh
 
-RUN echo "Flutter sdk" && \
-    cd /opt && \
-    wget --quiet https://storage.googleapis.com/flutter_infra/releases/stable/linux/flutter_linux_1.22.0-stable.tar.xz -O flutter.tar.xz && \
-    tar xf flutter.tar.xz && \
-    flutter config --no-analytics && \
-    rm -f flutter.tar.xz
+#RUN echo "Flutter sdk" && \
+#    cd /opt && \
+#    wget --quiet https://storage.googleapis.com/flutter_infra/releases/stable/linux/flutter_linux_1.22.0-stable.tar.xz -O flutter.tar.xz && \
+#    tar xf flutter.tar.xz && \
+#    flutter config --no-analytics && \
+#    rm -f flutter.tar.xz
 
 # Copy sdk license agreement files.
 RUN mkdir -p $ANDROID_HOME/licenses
 COPY sdk/licenses/* $ANDROID_HOME/licenses/
 
 # Create some jenkins required directory to allow this image run with Jenkins
-RUN mkdir -p /var/lib/jenkins/workspace && \
-    mkdir -p /home/jenkins && \
-    chmod 777 /home/jenkins && \
-    chmod 777 /var/lib/jenkins/workspace && \
-    chmod 777 $ANDROID_HOME/.android
+#RUN mkdir -p /var/lib/jenkins/workspace && \
+#    mkdir -p /home/jenkins && \
+#    chmod 777 /home/jenkins && \
+#    chmod 777 /var/lib/jenkins/workspace && \
+#    chmod 777 $ANDROID_HOME/.android
 
 # Install fastlane with bundler and Gemfile
 ENV BUNDLE_GEMFILE=/tmp/Gemfile
@@ -183,10 +171,13 @@ ENV BUNDLE_GEMFILE=/tmp/Gemfile
 COPY Gemfile /tmp/Gemfile
 
 RUN echo "fastlane" && \
-    gem install bundler --quiet --no-document > /dev/null && \
+    gem install bundler -v 2.1.4 --quiet --no-document > /dev/null && \
     mkdir -p /.fastlane && \
     chmod 777 /.fastlane && \
     bundle install --quiet
+
+ENV JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64/"
+ENV PATH="$JAVA_HOME/bin:$PATH_NO_JAVA"
 
 COPY README.md /README.md
 
@@ -199,13 +190,3 @@ ENV BUILD_DATE=${BUILD_DATE} \
     SOURCE_BRANCH=${SOURCE_BRANCH} \
     SOURCE_COMMIT=${SOURCE_COMMIT} \
     DOCKER_TAG=${DOCKER_TAG}
-
-# labels, see http://label-schema.org/
-LABEL maintainer="Ming Chen"
-LABEL org.label-schema.schema-version="1.0"
-LABEL org.label-schema.name="mingc/android-build-box"
-LABEL org.label-schema.version="${DOCKER_TAG}"
-LABEL org.label-schema.usage="/README.md"
-LABEL org.label-schema.docker.cmd="docker run --rm -v `pwd`:/project mingc/android-build-box bash -c 'cd /project; ./gradlew build'"
-LABEL org.label-schema.build-date="${BUILD_DATE}"
-LABEL org.label-schema.vcs-ref="${SOURCE_COMMIT}@${SOURCE_BRANCH}"
