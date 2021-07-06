@@ -185,11 +185,11 @@ ENV BUNDLE_GEMFILE=/tmp/Gemfile
 
 COPY Gemfile /tmp/Gemfile
 
-#RUN echo "fastlane" && \
-#    gem install bundler --quiet --no-document > /dev/null && \
-#    mkdir -p /.fastlane && \
-#    chmod 777 /.fastlane && \
-#    bundle install --quiet
+RUN echo "fastlane" && \
+    gem install bundler --quiet --no-document > /dev/null && \
+    mkdir -p /.fastlane && \
+    chmod 777 /.fastlane && \
+    bundle install --quiet
 
 #COPY README.md /README.md
 
