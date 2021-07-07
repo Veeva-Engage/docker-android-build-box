@@ -154,7 +154,7 @@ ENV BUNDLE_GEMFILE=/tmp/Gemfile
 COPY Gemfile /tmp/Gemfile
 
 RUN echo "fastlane" && \
-    gem install bundler --quiet --no-document > /dev/null && \
+    gem install bundler -v 2.1.4 --quiet --no-document > /dev/null && \
     mkdir -p /.fastlane && \
     chmod 777 /.fastlane && \
     bundle install --quiet
