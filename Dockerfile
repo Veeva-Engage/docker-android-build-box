@@ -12,6 +12,8 @@ ENV ANDROID_SDK_TOOLS_VERSION="4333796"
 # Get the latest version from https://developer.android.com/ndk/downloads/index.html
 ENV ANDROID_NDK_VERSION="r21e"
 
+ENV NODE_VERSION="12.x"
+
 # Set locale
 ENV LANG="en_US.UTF-8" \
     LANGUAGE="en_US.UTF-8" \
@@ -59,7 +61,6 @@ RUN apt-get update -qq > /dev/null && \
         libxml2-dev \
         m4 \
         ncurses-dev \
-        nodejs npm \
         ocaml \
         openjdk-8-jdk \
         openjdk-11-jdk \
@@ -75,6 +76,21 @@ RUN apt-get update -qq > /dev/null && \
         zlib1g-dev > /dev/null && \
     echo "set timezone" && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
+    echo "nodejs, npm" && \
+    curl -sL -k https://deb.nodesource.com/setup_${NODE_VERSION} \
+        | bash - > /dev/null && \
+    apt-get install -qq nodejs > /dev/null && \
+    apt-get clean > /dev/null && \
+    curl -sS -k https://dl.yarnpkg.com/debian/pubkey.gpg \
+        | apt-key add - > /dev/null && \
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" \
+        | tee /etc/apt/sources.list.d/yarn.list > /dev/null && \
+    apt-get update -qq > /dev/null && \
+    apt-get install -qq yarn > /dev/null && \
+    rm -rf /var/lib/apt/lists/ && \
+    npm install --quiet -g npm > /dev/null && \
+    npm install --quiet -g firebase-tools > /dev/null && \
+    npm cache clean --force > /dev/null && \
     rm -rf /tmp/* /var/tmp/*
 
 # Install Android SDK
