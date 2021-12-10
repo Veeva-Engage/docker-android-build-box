@@ -7,10 +7,10 @@ ENV ANDROID_HOME="/opt/android-sdk" \
 ENV TZ=America/Los_Angeles
 
 # Get the latest version from https://developer.android.com/studio/index.html
-ENV ANDROID_SDK_TOOLS_VERSION="4333796"
+ENV ANDROID_SDK_TOOLS_VERSION="7583922"
 
 # Get the latest version from https://developer.android.com/ndk/downloads/index.html
-ENV ANDROID_NDK_VERSION="r21e"
+ENV ANDROID_NDK_VERSION="r23b"
 
 ENV NODE_VERSION="12.x"
 
@@ -63,7 +63,7 @@ RUN apt-get update -qq > /dev/null && \
         ncurses-dev \
         ocaml \
         openjdk-8-jdk \
-        openjdk-11-jdk \
+        openjdk-14-jdk \
         openssh-client \
         pkg-config \
         ruby-full \
@@ -176,7 +176,7 @@ RUN echo "fastlane" && \
     chmod 777 /.fastlane && \
     bundle install --quiet
 
-ENV JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64/"
+ENV JAVA_HOME="/usr/lib/jvm/java-14-openjdk-amd64/"
 ENV PATH="$JAVA_HOME/bin:$PATH_NO_JAVA"
 
 COPY README.md /README.md
