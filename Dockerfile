@@ -127,6 +127,8 @@ RUN . /etc/jdk.env && \
 RUN echo "platforms" && \
     . /etc/jdk.env && \
     yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
+        "platforms;android-33" \
+        "platforms;android-32" \
         "platforms;android-31" \
         "platforms;android-30" > /dev/null
 
@@ -135,14 +137,10 @@ RUN echo "platform tools" && \
     yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
         "platform-tools" > /dev/null
 
-RUN echo "build tools 26-30" && \
+RUN echo "build tools 30-33" && \
     . /etc/jdk.env && \
     yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
-        "build-tools;31.0.0" "build-tools;30.0.3" > /dev/null
-
-# ndk-bundle does exist on arm64
-# RUN echo "NDK" && \
-#     yes | "$ANDROID_HOME"/tools/bin/sdkmanager "ndk-bundle" > /dev/null
+        "build-tools;32.0.0" "build-tools;32.0.0" "build-tools;31.0.0" "build-tools;30.0.3" > /dev/null
 
 RUN echo "NDK" && \
     NDK=$(grep 'ndk;' packages.txt | sort | tail -n1 | awk '{print $1}') && \
@@ -177,6 +175,7 @@ RUN echo "fastlane" && \
 RUN git clone https://github.com/jenv/jenv.git ~/.jenv && \
     echo 'export PATH="$HOME/.jenv/bin:$PATH"' >> ~/.bash_profile && \
     echo 'eval "$(jenv init -)"' >> ~/.bash_profile && \
+    chmod 777 ~/.bash_profile && \
     . ~/.bash_profile && \
     . /etc/jdk.env && \
     java -version && \
